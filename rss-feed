@@ -1,0 +1,80 @@
+<txp::config /><txp:php>
+/**
+ *
+ * JSON Feed for Textpattern
+ *
+ * @link: https://jsonfeed.org/version/1
+ * @url:  https://validator.jsonfeed.org/
+ *
+ * Associate this page template with a section named "rss-feed"
+ *
+ */
+// Setting headers
+header("Cache-Control: Public, max-age=900, must-revalidate, s-maxage=600, proxy-revalidate");
+header("X-Robots-Tag: noindex, nosnippet, noarchive, noodp");
+header("X-Powered-By: Simplr theme for Textpattern CMS");
+
+// Extract the last row from the "textpattern" table.
+$rs = safe_row("LastMod", 'textpattern', "1 = 1 ORDER BY LastMod DESC LIMIT 1");
+
+// Dates format: PHP 5.2.16 minimum required.
+$now = new DateTime(date("Ymd"));
+$now = $now->format('Ymd');
+$last = new DateTime($rs['LastMod']);
+$last = $last->format('Ymd');
+
+header('Last-Modified: "'.$rs['LastMod'].'"');
+
+</txp:php><txp:txp_header value="application/json; charset=utf-8" />
+{
+	"version": "https:\/\/jsonfeed.org\/version\/1",
+	"user_comment": "This feed allows you to read the posts from this site in any feed reader that supports the JSON Feed format. To add this feed to your reader, copy the following URL — <txp:site_url />rss-feed — and add it into your reader.",
+	"home_page_url": "<txp:site_url escape="json" />",
+	"feed_url": "<txp:site_url escape="json" />rss-feed\/",
+	"title": "<txp:site_name escape="tidy,json" />",
+	"description": "<txp:evaluate test='<txp:meta_description />'><txp:site_name escape="tidy,json" /> <txp:site_slogan escape="tidy,json" /><txp:else /><txp:meta_description format="" /></txp:evaluate>",
+	"icon": "<txp:site_url escape="json" />android-chrome-512x512.png",
+	"favicon": "<txp:site_url escape="json" />apple-touch-icon.png",
+	"expired": false,
+	"items": [<txp:article_custom section='<txp:variable name="blog_pages" />' limit="10">
+	{
+		"id": "<txp:site_url escape="json" />index.php?id=<txp:article_id />",
+		"url": "<txp:permlink escape="json" />\/",
+		"title": "<txp:title escape="tidy,json" />",
+		"content_html": "<txp:evaluate escape="json"><txp:body /></txp:evaluate>",
+		"content_text": <txp:php>
+/**
+ * Return a JSON text without any HTML tags
+ */
+
+$input = body(array());
+
+// Remove HTML TAGs
+$input = preg_replace ('/<[^>]*>/', ' ', $input);
+// And tabs, cariages, new lines
+$input = str_replace(array("\r", "\n", "\t"), '', $input);
+   
+// Remove multiple spaces
+$input = trim(preg_replace('/ {2,}/', ' ', $input));
+
+// Return a JSON string.
+echo json_encode($input);
+
+</txp:php>,<txp:if_excerpt>
+		"summary": "<txp:excerpt escape="tidy,p,br,json" />",</txp:if_excerpt><txp:if_plugin name="smd_thumbnail"><txp:images limit="1">
+		"date_published": "<txp:posted format="iso8601" />",<txp:evaluate query='<txp:modified format="%S" /> = <txp:posted format="%S" />'><txp:else />
+		"date_modified": "<txp:modified format="iso8601" />",</txp:evaluate><txp:smd_thumbnail type="social_share">
+		"banner_image" : "<txp:evaluate escape="json"><txp:smd_thumbnail type="social_share" display="url"  /></txp:evaluate>",</txp:smd_thumbnail></txp:images></txp:if_plugin><txp:if_article_image><txp:images limit="1">
+		"image": "<txp:image_url thumbnail="0" escape="json" />",</txp:images></txp:if_article_image><txp:if_article_category>
+		"tags": [<txp:if_article_category number="1">"<txp:category1 title="1" link="0" />"</txp:if_article_category><txp:if_article_category number="2">, "<txp:category2 title="1" link="0" />"</txp:if_article_category>],</txp:if_article_category>
+		"author": {
+			"name": "<txp:authors sort="RealName" break="" class=""><txp:author format="" link="" escape="tidy,json" section="blog" title="1" />",
+			"url": "<txp:evaluate escape="trim, json"><txp:author format="url" section='<txp:variable name="blog_pages" />' title="1" /></txp:evaluate></txp:authors>",
+			"avatar": "<txp:php>
+$result = md5(strtolower(trim(author_email(array()))));
+echo( ($result ? 'https:\/\/secure.gravatar.com\/avatar\/'.$result : 'https:\/\/secure.gravatar.com\/avatar\/2bf8ee69e82edbf79beaae1ea4a849bc?s=512&d=mm&r=g') );
+</txp:php>"
+		}
+	}<txp:if_last_article><txp:else />,</txp:if_last_article></txp:article_custom>
+]
+}
