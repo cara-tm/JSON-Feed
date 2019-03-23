@@ -1,4 +1,4 @@
-# JSON-Feed
+# ❴❵ JSON-Feed
 JSON Feed RSS for Textpattern CMS (v4.7+)
 
 Full standalone template page (no plugin needed: smd_thumbnail is optional).
