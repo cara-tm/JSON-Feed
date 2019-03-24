@@ -5,4 +5,10 @@ Full standalone template page (no plugin needed: smd_thumbnail is optional).
 
 `<txp::config />` is a form created to store some global TXP variables (this template uses only one: `<txp:variable name="blog_pages" />` in order to set your blog (articles) section name.
 
+## Usage
+
 Create a page named `rss-feed` and copy/past the entire template in it. Attach this page to a `rss-feed` section. Done!
+
+## Acknowledgements
+
+Special thanks to Oleg (Core Dev) who show me how to escape the author's link in a JSON format.
